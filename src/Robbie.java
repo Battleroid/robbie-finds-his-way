@@ -40,6 +40,9 @@ public class Robbie extends Application {
                     case A:
                         logic.robot.moveX(Logic.Direction.W.dx * logic.cellSize);
                         break;
+                    case N:
+                        logic.reset();
+                        break;
                 }
             }
         });

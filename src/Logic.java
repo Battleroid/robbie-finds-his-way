@@ -20,6 +20,26 @@ public class Logic extends Pane {
     public ArrayList<Shape> obstacles = new ArrayList<>();
     int[][] board;
 
+    public void reset() {
+        getChildren().clear();
+        buildBoard();
+        buildGrid();
+        addObstacles();
+        addPath();
+        addRobot();
+        addSE();
+    }
+
+    public void reset() {
+        getChildren().clear();
+        buildBoard();
+        buildGrid();
+        addObstacles();
+        addPath();
+        addRobot();
+        addSE();
+    }
+
     public Logic(int cellSize) {
         this.cellSize = cellSize;
 
@@ -32,21 +52,80 @@ public class Logic extends Pane {
     }
 
     public void tick() {
-        System.out.println("Ticked, " + robot.getX() / cellSize + ", " + robot.getY() / cellSize);
+        System.out.println("Tick - " + robot.getX() / cellSize + ", " + robot.getY() / cellSize);
 
+        // are we at the goal already?
         if (robot.hits(end)) return;
 
-        if (isDirectionBlocked(Direction.N) && !isDirectionBlocked(Direction.E)) {
-            robot.moveX(Direction.E.dx * cellSize);
-        } else if (isDirectionBlocked(Direction.E) && !isDirectionBlocked(Direction.S)) {
-            robot.moveY(Direction.S.dy * cellSize);
-        } else if (isDirectionBlocked(Direction.S) && !isDirectionBlocked(Direction.W)) {
-            robot.moveX(Direction.W.dx * cellSize);
-        } else if (isDirectionBlocked(Direction.W) && !isDirectionBlocked(Direction.N)) {
-            robot.moveY(Direction.N.dy * cellSize);
-        } else {
-            robot.moveY(Direction.N.dy * cellSize);
+        // check if we hit the goal yet
+        if (found()) return;
+
+        // boundary following
+        if (isSensorBlocked(Sensor.X1) && !isSensorBlocked(Sensor.X2))
+            robot.moveD(Direction.E, cellSize);
+        else if (isSensorBlocked(Sensor.X2) && !isSensorBlocked(Sensor.X3))
+            robot.moveD(Direction.S, cellSize);
+        else if (isSensorBlocked(Sensor.X3) && !isSensorBlocked(Sensor.X4))
+            robot.moveD(Direction.W, cellSize);
+        else if (isSensorBlocked(Sensor.X4) && !isSensorBlocked(Sensor.X1))
+            robot.moveD(Direction.N, cellSize);
+        else
+            robot.moveD(Direction.N, cellSize);
+
+        showNeigboring();
+    }
+
+    private void showNeigboring() {
+        for (Direction d : Direction.values()) {
+            int x = (int) ((robot.getX() / cellSize) + d.dx);
+            int y = (int) ((robot.getY() / cellSize) + d.dy);
+            System.out.println("Inbounds: " + inbounds(x, y));
+            if (!inbounds(x, y)) continue;
+
+            System.out.println("Board: " + board[x][y] + ", @ " + x + ", " + y);
+
+            if (board[x][y] == -1) {
+                Rectangle rect = new Rectangle(cellSize, cellSize);
+                rect.setOpacity(0.5);
+                if (isDirectionBlocked(d)) {
+                    rect.setFill(Color.RED);
+                    board[x][y] = 1;
+                } else {
+                    rect.setFill(Color.LIGHTCYAN);
+                    board[x][y] = 0;
+                }
+                rect.setTranslateX(robot.getX() + (d.dx * cellSize));
+                rect.setTranslateY(robot.getY() + (d.dy * cellSize));
+                getChildren().add(rect);
+            }
         }
+    }
+
+    private boolean inbounds(int x, int y) {
+        return (x < board.length && x >= 0) && (y < board[0].length && y >= 0);
+    }
+
+    public boolean found() {
+        Direction[] nwse = new Direction[]{
+                Direction.N,
+                Direction.E,
+                Direction.S,
+                Direction.W
+        };
+
+        double bx = robot.getX();
+        double by = robot.getY();
+
+        boolean foundEnd = false;
+        for (Direction d : nwse) {
+            robot.moveD(d, cellSize);
+            foundEnd = robot.hits(end);
+            if (foundEnd)
+                break;
+            robot.setXY(bx, by);
+        }
+
+        return foundEnd;
     }
 
     private boolean isDirectionBlocked(Direction d) {
@@ -86,7 +165,7 @@ public class Logic extends Pane {
         board = new int[19][21];
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
-                board[i][j] = 0;
+                board[i][j] = -1;
             }
         }
     }
@@ -157,7 +236,7 @@ public class Logic extends Pane {
     private void addObstacles() {
         Rectangle a = new Rectangle(2 * cellSize, 16 * cellSize, 9 * cellSize, 3 * cellSize);
         Rectangle b = new Rectangle(3 * cellSize, 8 * cellSize + (0.5 * cellSize), 6 * cellSize, 3 * cellSize + (0.5 * cellSize));
-        Ellipse c = new Ellipse(14.5 * cellSize, 7 * cellSize, 3.5 * cellSize, 3 * cellSize);
+        Ellipse c = new Ellipse(14.35 * cellSize, 7 * cellSize, 3.5 * cellSize, 3 * cellSize);
         obstacles.add(a);
         obstacles.add(b);
         obstacles.add(c);
@@ -185,10 +264,10 @@ public class Logic extends Pane {
     }
 
     public enum Sensor {
-        A(Direction.NW, Direction.N),
-        B(Direction.NE, Direction.E),
-        C(Direction.SE, Direction.S),
-        D(Direction.SW, Direction.W);
+        X1(Direction.N, Direction.NE),
+        X2(Direction.E, Direction.SE),
+        X3(Direction.S, Direction.SW),
+        X4(Direction.W, Direction.NW);
 
         public final Direction a;
         public final Direction b;

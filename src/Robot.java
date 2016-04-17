@@ -18,6 +18,11 @@ public class Robot {
         this.shape = shape;
     }
 
+    public void moveD(Logic.Direction d, int scale) {
+        moveX(d.dx * scale);
+        moveY(d.dy * scale);
+    }
+
     public void moveX(double dx) {
         x += dx;
         shape.setTranslateX(x);
