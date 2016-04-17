@@ -64,12 +64,12 @@ public class Logic extends Pane {
         else
             robot.moveD(Direction.N, cellSize);
 
-        showNeigboring();
+        showNeighboring();
 
         return false;
     }
 
-    private void showNeigboring() {
+    private void showNeighboring() {
         for (Direction d : Direction.values()) {
             int x = (int) ((robot.getX() / cellSize) + d.dx);
             int y = (int) ((robot.getY() / cellSize) + d.dy);
@@ -93,6 +93,7 @@ public class Logic extends Pane {
                 getChildren().add(rect);
             }
         }
+        robot.getShape().toFront();
     }
 
     private boolean inbounds(int x, int y) {
