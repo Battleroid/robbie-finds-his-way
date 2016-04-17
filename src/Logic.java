@@ -1,6 +1,7 @@
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ public class Logic extends Pane {
     public Polyline path;
     public ArrayList<Shape> obstacles = new ArrayList<>();
     int[][] board;
+    Text[][] boardText;
 
     public Logic(int cellSize) {
         this.cellSize = cellSize;
@@ -41,14 +43,14 @@ public class Logic extends Pane {
         addSE();
     }
 
-    public void tick() {
+    public boolean tick() {
         System.out.println("Tick - " + robot.getX() / cellSize + ", " + robot.getY() / cellSize);
 
         // are we at the goal already?
-        if (robot.hits(end)) return;
+        if (robot.hits(end)) return true;
 
         // check if we hit the goal yet
-        if (found()) return;
+        if (found()) return true;
 
         // boundary following
         if (isSensorBlocked(Sensor.X1) && !isSensorBlocked(Sensor.X2))
@@ -63,16 +65,15 @@ public class Logic extends Pane {
             robot.moveD(Direction.N, cellSize);
 
         showNeigboring();
+
+        return false;
     }
 
     private void showNeigboring() {
         for (Direction d : Direction.values()) {
             int x = (int) ((robot.getX() / cellSize) + d.dx);
             int y = (int) ((robot.getY() / cellSize) + d.dy);
-            System.out.println("Inbounds: " + inbounds(x, y));
             if (!inbounds(x, y)) continue;
-
-            System.out.println("Board: " + board[x][y] + ", @ " + x + ", " + y);
 
             if (board[x][y] == -1) {
                 Rectangle rect = new Rectangle(cellSize, cellSize);
@@ -80,10 +81,13 @@ public class Logic extends Pane {
                 if (isDirectionBlocked(d)) {
                     rect.setFill(Color.RED);
                     board[x][y] = 1;
+                    boardText[x][y].setStyle("-fx-fill: white; -fx-stroke: red; -fx-stroke-width: 1px;");
                 } else {
                     rect.setFill(Color.LIGHTCYAN);
                     board[x][y] = 0;
                 }
+                boardText[x][y].setText("" + board[x][y]);
+                boardText[x][y].toFront();
                 rect.setTranslateX(robot.getX() + (d.dx * cellSize));
                 rect.setTranslateY(robot.getY() + (d.dy * cellSize));
                 getChildren().add(rect);
@@ -153,9 +157,15 @@ public class Logic extends Pane {
 
     private void buildBoard() {
         board = new int[19][21];
+        boardText = new Text[19][21];
+        double pad = cellSize * 0.25;
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 board[i][j] = -1;
+                boardText[i][j] = new Text((i * cellSize) + pad, ((j + 1) * cellSize) - pad, "?");
+                boardText[i][j].setOpacity(0.5);
+                boardText[i][j].setFont(new Font("Consolas", 9));
+                getChildren().add(boardText[i][j]);
             }
         }
     }
