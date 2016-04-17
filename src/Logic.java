@@ -20,29 +20,19 @@ public class Logic extends Pane {
     public ArrayList<Shape> obstacles = new ArrayList<>();
     int[][] board;
 
-    public void reset() {
-        getChildren().clear();
-        buildBoard();
-        buildGrid();
-        addObstacles();
-        addPath();
-        addRobot();
-        addSE();
-    }
-
-    public void reset() {
-        getChildren().clear();
-        buildBoard();
-        buildGrid();
-        addObstacles();
-        addPath();
-        addRobot();
-        addSE();
-    }
-
     public Logic(int cellSize) {
         this.cellSize = cellSize;
 
+        buildBoard();
+        buildGrid();
+        addObstacles();
+        addPath();
+        addRobot();
+        addSE();
+    }
+
+    public void reset() {
+        getChildren().clear();
         buildBoard();
         buildGrid();
         addObstacles();
