@@ -1,3 +1,4 @@
+import javafx.geometry.Point2D;
 import javafx.scene.shape.Shape;
 
 /**
@@ -45,6 +46,10 @@ public class Robot {
 
     public double getY() {
         return y;
+    }
+
+    public Point2D getPt() {
+        return new Point2D(x, y);
     }
 
     public Shape getShape() {

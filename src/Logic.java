@@ -1,6 +1,7 @@
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.text.Text;
 
 import java.util.ArrayList;
 
@@ -12,6 +13,7 @@ public class Logic extends Pane {
 
     // robot related
     public Robot robot;
+
     // shapes
     public Shape end;
     public Polyline path;
@@ -30,38 +32,54 @@ public class Logic extends Pane {
     }
 
     public void tick() {
-        System.out.println("Ticked, " + robot.getX() + ", " + robot.getY());
-        if (robot.hits(end)) return; // we're at the goal, no point in continuing
+        System.out.println("Ticked, " + robot.getX() / cellSize + ", " + robot.getY() / cellSize);
 
-        // check for path and avoid obstacles
-        for (Sensor s : Sensor.values()) {
-            System.out.println(s.toString() + ": " + blocked(s));
+        if (robot.hits(end)) return;
+
+        if (isDirectionBlocked(Direction.N) && !isDirectionBlocked(Direction.E)) {
+            robot.moveX(Direction.E.dx * cellSize);
+        } else if (isDirectionBlocked(Direction.E) && !isDirectionBlocked(Direction.S)) {
+            robot.moveY(Direction.S.dy * cellSize);
+        } else if (isDirectionBlocked(Direction.S) && !isDirectionBlocked(Direction.W)) {
+            robot.moveX(Direction.W.dx * cellSize);
+        } else if (isDirectionBlocked(Direction.W) && !isDirectionBlocked(Direction.N)) {
+            robot.moveY(Direction.N.dy * cellSize);
+        } else {
+            robot.moveY(Direction.N.dy * cellSize);
         }
     }
 
-    private boolean blocked(Sensor sensor) {
+    private boolean isDirectionBlocked(Direction d) {
+        double bx = robot.getX();
+        double by = robot.getY();
+
+        robot.moveX(d.dx * cellSize);
+        robot.moveY(d.dy * cellSize);
+
         boolean isBlocked = false;
-
-        for (Direction d : new Direction[]{sensor.a, sensor.b}) {
-            double bx = robot.getX();
-            double by = robot.getY();
-
-            robot.moveX(d.dx * cellSize);
-            robot.moveY(d.dy * cellSize);
-
-            for (Shape s : obstacles) {
-                if (robot.hits(s)) {
-                    isBlocked = true;
-                    break;
-                }
+        for (Shape s : obstacles) {
+            if (robot.hits(s)) {
+                isBlocked = true;
+                break;
             }
-
-            robot.setXY(bx, by);
-
-            if (isBlocked) return isBlocked;
         }
 
-        return false;
+        robot.setXY(bx, by);
+
+        return isBlocked;
+    }
+
+    private boolean isSensorBlocked(Sensor sensor) {
+        boolean isBlocked = false;
+
+        for (Direction d : sensor.toArray()) {
+            if (isDirectionBlocked(d)) {
+                isBlocked = true;
+                break;
+            }
+        }
+
+        return isBlocked;
     }
 
     private void buildBoard() {
@@ -78,13 +96,18 @@ public class Logic extends Pane {
         Rectangle start = new Rectangle(10.0 * cellSize, 20 * cellSize, cellSize, cellSize);
         start.setFill(Color.GOLD);
         start.setOpacity(0.25);
+        Text st = new Text(10.0 * cellSize, 21 * cellSize, "S");
 
         // ending goal with visual marker
         end = new Rectangle(16.0 * cellSize, 0, cellSize, cellSize);
         end.setFill(Color.VIOLET);
         end.setOpacity(0.25);
+        Text et = new Text(16.0 * cellSize, 1 * cellSize, "E");
 
-        getChildren().addAll(start, end);
+        st.setOpacity(0.5);
+        et.setOpacity(0.5);
+
+        getChildren().addAll(start, end, st, et);
     }
 
     private void addRobot() {
@@ -128,6 +151,7 @@ public class Logic extends Pane {
         path.setStroke(Color.BLUE);
         getChildren().add(path);
         path.toBack();
+        obstacles.add(path);
     }
 
     private void addObstacles() {
@@ -172,6 +196,10 @@ public class Logic extends Pane {
         Sensor(Direction a, Direction b) {
             this.a = a;
             this.b = b;
+        }
+
+        public Direction[] toArray() {
+            return new Direction[]{a, b};
         }
     }
 
