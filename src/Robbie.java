@@ -49,16 +49,16 @@ public class Robbie extends Application {
                         logic.tick();
                         break;
                     case W:
-                        logic.robot.moveD(Logic.Direction.N, cellSize);
+                        logic.robot.moveD(Logic.Direction.N);
                         break;
                     case D:
-                        logic.robot.moveD(Logic.Direction.E, cellSize);
+                        logic.robot.moveD(Logic.Direction.E);
                         break;
                     case S:
-                        logic.robot.moveD(Logic.Direction.S, cellSize);
+                        logic.robot.moveD(Logic.Direction.S);
                         break;
                     case A:
-                        logic.robot.moveD(Logic.Direction.W, cellSize);
+                        logic.robot.moveD(Logic.Direction.W);
                         break;
                     case N:
                         logic.reset();

@@ -10,17 +10,18 @@ import java.util.ArrayList;
  * Created by casey on 2016-04-16.
  */
 public class Logic extends Pane {
-    public static double cellSize;
+    private final double cellSize;
+    private final Direction[] nwse = {Direction.N, Direction.E, Direction.S, Direction.W};
 
     // robot related
     public Robot robot;
+    private int[][] board;
 
     // shapes
-    public Shape end;
-    public Polyline path;
-    public ArrayList<Shape> obstacles = new ArrayList<>();
-    int[][] board;
-    Text[][] boardText;
+    private Shape end;
+    private Polyline path;
+    private ArrayList<Shape> obstacles = new ArrayList<>();
+    private Text[][] boardText;
 
     public Logic(double cellSize) {
         this.cellSize = cellSize;
@@ -53,7 +54,7 @@ public class Logic extends Pane {
         if (found()) return true;
 
         // follow
-        followBehavior();
+        boundaryBehavior();
 
         // set values in board and visualize the encounters
         showNeighboring();
@@ -61,17 +62,27 @@ public class Logic extends Pane {
         return false;
     }
 
-    private void followBehavior() {
+    private void boundaryBehavior() {
         if (isSensorBlocked(Sensor.X1) && !isSensorBlocked(Sensor.X2))
-            robot.moveD(Direction.E, cellSize);
+            robot.moveD(Direction.E);
         else if (isSensorBlocked(Sensor.X2) && !isSensorBlocked(Sensor.X3))
-            robot.moveD(Direction.S, cellSize);
+            robot.moveD(Direction.S);
         else if (isSensorBlocked(Sensor.X3) && !isSensorBlocked(Sensor.X4))
-            robot.moveD(Direction.W, cellSize);
+            robot.moveD(Direction.W);
         else if (isSensorBlocked(Sensor.X4) && !isSensorBlocked(Sensor.X1))
-            robot.moveD(Direction.N, cellSize);
+            robot.moveD(Direction.N);
         else
-            robot.moveD(Direction.N, cellSize);
+            robot.moveD(Direction.N);
+    }
+
+    private boolean hasPath(Direction d) {
+        double bx = robot.getX();
+        double by = robot.getY();
+        robot.moveD(d);
+        boolean has = robot.hits(path);
+        robot.setXY(bx, by);
+
+        return has;
     }
 
     private void showNeighboring() {
@@ -106,19 +117,12 @@ public class Logic extends Pane {
     }
 
     public boolean found() {
-        Direction[] nwse = new Direction[]{
-                Direction.N,
-                Direction.E,
-                Direction.S,
-                Direction.W
-        };
-
         double bx = robot.getX();
         double by = robot.getY();
 
         boolean foundEnd = false;
         for (Direction d : nwse) {
-            robot.moveD(d, cellSize);
+            robot.moveD(d);
             foundEnd = robot.hits(end);
             if (foundEnd)
                 break;
@@ -201,11 +205,12 @@ public class Logic extends Pane {
         robot = new Robot(rect);
         getChildren().add(robot.getShape());
         robot.setXY(10.0 * cellSize, 20 * cellSize);
+        robot.setMovementScale(cellSize);
     }
 
     private void addPath() {
         path = new Polyline();
-        path.getPoints().addAll(new Double[]{
+        Double[] pts = new Double[]{
                 8.9 * cellSize, 21.0 * cellSize,
                 9.1 * cellSize, 19.0 * cellSize,
                 4.5 * cellSize, 16.0 * cellSize,
@@ -231,7 +236,8 @@ public class Logic extends Pane {
                 15.0 * cellSize, 3.5 * cellSize,
                 16.0 * cellSize, 2.0 * cellSize,
                 16.5 * cellSize, 0.0
-        });
+        };
+        path.getPoints().addAll(pts);
         path.setStrokeWidth(1);
         path.setStroke(Color.BLUE);
         getChildren().add(path);
