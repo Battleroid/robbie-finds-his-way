@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * Created by casey on 2016-04-16.
  */
 public class Logic extends Pane {
-    public static int cellSize;
+    public static double cellSize;
 
     // robot related
     public Robot robot;
@@ -22,7 +22,7 @@ public class Logic extends Pane {
     int[][] board;
     Text[][] boardText;
 
-    public Logic(int cellSize) {
+    public Logic(double cellSize) {
         this.cellSize = cellSize;
 
         buildBoard();
@@ -49,10 +49,19 @@ public class Logic extends Pane {
         // are we at the goal already?
         if (robot.hits(end)) return true;
 
-        // check if we hit the goal yet
+        // check if we see the goal yet
         if (found()) return true;
 
-        // boundary following
+        // follow
+        followBehavior();
+
+        // set values in board and visualize the encounters
+        showNeighboring();
+
+        return false;
+    }
+
+    private void followBehavior() {
         if (isSensorBlocked(Sensor.X1) && !isSensorBlocked(Sensor.X2))
             robot.moveD(Direction.E, cellSize);
         else if (isSensorBlocked(Sensor.X2) && !isSensorBlocked(Sensor.X3))
@@ -63,10 +72,6 @@ public class Logic extends Pane {
             robot.moveD(Direction.N, cellSize);
         else
             robot.moveD(Direction.N, cellSize);
-
-        showNeighboring();
-
-        return false;
     }
 
     private void showNeighboring() {

@@ -18,7 +18,7 @@ public class Robot {
         this.shape = shape;
     }
 
-    public void moveD(Logic.Direction d, int scale) {
+    public void moveD(Logic.Direction d, double scale) {
         moveX(d.dx * scale);
         moveY(d.dy * scale);
     }

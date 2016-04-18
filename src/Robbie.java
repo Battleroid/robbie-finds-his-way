@@ -13,7 +13,7 @@ import javafx.util.Duration;
  * Created by casey on 2016-04-16.
  */
 public class Robbie extends Application {
-    final static int cellSize = 15;
+    final static double cellSize = 15;
 
     public static void main(String[] args) {
         launch(args);
@@ -26,7 +26,8 @@ public class Robbie extends Application {
         stage.setScene(scene);
         stage.show();
 
-        Duration duration = new Duration(1000 / 5);
+        int rate = 5;
+        Duration duration = new Duration(1000 / rate);
         KeyFrame frame = new KeyFrame(duration,
                 new EventHandler<ActionEvent>() {
                     @Override
@@ -39,7 +40,6 @@ public class Robbie extends Application {
         timer.getKeyFrames().add(frame);
         timer.setCycleCount(Animation.INDEFINITE);
         timer.setDelay(duration);
-//        timer.play();
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
@@ -49,16 +49,16 @@ public class Robbie extends Application {
                         logic.tick();
                         break;
                     case W:
-                        logic.robot.moveY(Logic.Direction.N.dy * logic.cellSize);
+                        logic.robot.moveD(Logic.Direction.N, cellSize);
                         break;
                     case D:
-                        logic.robot.moveX(Logic.Direction.E.dx * logic.cellSize);
+                        logic.robot.moveD(Logic.Direction.E, cellSize);
                         break;
                     case S:
-                        logic.robot.moveY(Logic.Direction.S.dy * logic.cellSize);
+                        logic.robot.moveD(Logic.Direction.S, cellSize);
                         break;
                     case A:
-                        logic.robot.moveX(Logic.Direction.W.dx * logic.cellSize);
+                        logic.robot.moveD(Logic.Direction.W, cellSize);
                         break;
                     case N:
                         logic.reset();
