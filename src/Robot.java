@@ -7,20 +7,22 @@ import javafx.scene.shape.Shape;
 public class Robot {
     private double x, y;
     private Shape shape;
+    private double movementScale;
 
     public Robot(Shape shape) {
         this.shape = shape;
     }
 
-    public Robot(double x, double y, Shape shape) {
+    public Robot(double x, double y, double movementScale, Shape shape) {
         this.x = x;
         this.y = y;
+        this.movementScale = movementScale;
         this.shape = shape;
     }
 
-    public void moveD(Logic.Direction d, double scale) {
-        moveX(d.dx * scale);
-        moveY(d.dy * scale);
+    public void moveD(Logic.Direction d) {
+        moveX(d.dx * movementScale);
+        moveY(d.dy * movementScale);
     }
 
     public void moveX(double dx) {
@@ -43,6 +45,14 @@ public class Robot {
     public boolean hits(Shape shape) {
         Shape xsect = Shape.intersect(this.shape, shape);
         return xsect.getBoundsInLocal().getWidth() != -1;
+    }
+
+    public double getMovementScale() {
+        return movementScale;
+    }
+
+    public void setMovementScale(double movementScale) {
+        this.movementScale = movementScale;
     }
 
     public double getX() {
